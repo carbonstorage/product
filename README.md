@@ -1,3 +1,3 @@
-# User service
+# Product service
 
-This is a user service of carbonstorage project
+This is a product service of carbonstorage project
