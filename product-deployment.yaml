@@ -1,53 +1,54 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-deployment
+  name: product-deployment
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: user
+      app: product
   template:
     metadata:
       labels:
-        app: user
+        app: product
     spec:
       containers:
         - name: api
-          image: registry.digitalocean.com/carbon-server/user:0.10
+          # image: registry.digitalocean.com/carbon-server/product:0.1
+          image: kandit/product:0.1
           ports:
             - containerPort: 5000
           env:
-            - name: USER_SERVICE_DATABASE_URL
+            - name: PRODUCT_SERVICE_DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: user-service-secret
-                  key: USER_SERVICE_DATABASE_URL
-            - name: CARBON_DB
+                  name: product-service-secret
+                  key: PRODUCT_SERVICE_DATABASE_URL
+            - name: CARBON_SERVER_LOG_DB
               valueFrom:
                 secretKeyRef:
-                  name: user-service-secret
-                  key: CARBON_DB
+                  name: product-service-secret
+                  key: CARBON_SERVER_LOG_DB
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: user-service
+  name: product-service
   labels:
-    app: user-service
+    app: product-service
 spec:
   ports:
     - port: 80
       name: http
       targetPort: 5000
   selector:
-    app: user
+    app: product
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: user
+  name: product
   namespace: default
   annotations:
     konghq.com/methods: 'GET,POST'
@@ -58,10 +59,10 @@ spec:
   rules:
     - http:
         paths:
-          - path: /api/users
+          - path: /api/products
             pathType: Prefix
             backend:
               service:
-                name: user-service
+                name: product-service
                 port:
                   number: 80
